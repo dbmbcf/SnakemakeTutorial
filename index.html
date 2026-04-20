@@ -2312,13 +2312,11 @@ Important
 </div>
 <ul>
 <li>Now, use conda to install snakemake:</li>
+<li>The additional package <code>snakemake-executor-plugin-cluster-generic</code> is required for the slurm profile (see below)</li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> snakemake snakemake=8.30 snakemake-executor-plugin-cluster-generic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<ul>
-<li>The additional package <code>snakemake-executor-plugin-cluster-generic</code> is required for the slurm profile (see below)</li>
-</ul>
 </section>
 </section>
 <section id="example-workflow-read-alignment-and-gene-counting" class="level1">
@@ -2366,8 +2364,8 @@ Important
 <section id="example-1" class="level3">
 <h3 class="anchored" data-anchor-id="example-1">Example 1</h3>
 <ul>
-<li><p>The first example uses the above <code>Snakefile</code> and the file <code>sample.fq.gz</code> (which is the required input of rule <code>align</code>). Both are assumed to be in the execution directory.</p></li>
-<li><p>Snakemake will read the <code>Snakefile</code>, and without specifying any desired output (=targets) via the command line, will use the first rule (<code>all</code>) to determine the desired output</p></li>
+<li>The first example uses the above <code>Snakefile</code> and the file <code>sample.fq.gz</code> (which is the required input of rule <code>align</code>). Both are assumed to be in the execution directory.</li>
+<li>Snakemake will read the <code>Snakefile</code>, and without specifying any desired output (=targets) via the command line, will use the first rule (<code>all</code>) to determine the desired output</li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-n</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2535,23 +2533,24 @@ Note
 </div>
 </div>
 <ul>
-<li><p>The <code>shell</code> directive is used for code running in bash (strict mode). It can access all local and global variables (<code>wildcards</code>, <code>input</code>, <code>output</code> etc.)</p></li>
-<li><p>The <code>params</code> slot allows to handle additional rule-specific parameters such as the STAR index or tool options. In our example, these options are taken from another configuration file (<code>tools.ymal</code>):</p></li>
+<li>The <code>shell</code> directive is used for code running in bash (strict mode). It can access all local and global variables (<code>wildcards</code>, <code>input</code>, <code>output</code> etc.)</li>
+<li>The <code>params</code> slot allows to handle additional rule-specific parameters such as the STAR index or tool options. In our example, these options are taken from another configuration file (<code>tools.ymal</code>):</li>
 </ul>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
-<pre><strong>config.yaml</strong></pre>
+<pre><strong>tools.yaml</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="config.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">star</span><span class="kw">:</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="tools.yaml"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">star</span><span class="kw">:</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/scicore/home/ivanek/GROUP/genomes/mm10/STAR_2.7.0c&quot;</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">options</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat&quot;</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">feature_counts</span><span class="kw">:</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">options</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;-O -M --primary&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
-<li><p>Snakemake offers special support for a couple of <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-external-scripts">scripting languages</a></p></li>
-<li><p>R scripts will be wrapped with code to make local and global variables transparent in a <code>snakemake</code> object, such as <code>input</code>, <code>output</code>, <code>params</code>, <code>wildcards</code> or <code>config</code></p></li>
-<li><p>By that users can omit writing command line parsers for their scripts. E.g. within the <code>create_dge_list.R</code> script:</p></li>
+<li>Snakemake offers special support for a couple of <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-external-scripts">scripting languages</a></li>
+<li>R scripts will be wrapped with code to make local and global variables transparent in a <code>snakemake</code> object, such as <code>input</code>, <code>output</code>, <code>params</code>, <code>wildcards</code> or <code>config</code></li>
+<li>By that users can omit writing command line parsers for their scripts. E.g. within the <code>create_dge_list.R</code> script</li>
+<li>R scripts will be called via <code>Rscript --vanilla</code>, i.e. all user-specific settings (<code>.Rprofile</code> etc.) are not interpreted</li>
 </ul>
 <div class="cell">
 <div class="code-with-filename">
@@ -2574,9 +2573,6 @@ Note
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dgel, <span class="at">file=</span>snakemake<span class="sc">@</span>output[[<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<ul>
-<li>R scripts will be called via <code>Rscript --vanilla</code>, i.e. all user-specific settings (<code>.Rprofile</code> etc.) are not interpreted</li>
-</ul>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2730,7 +2726,9 @@ Tip
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load Graphviz/5.0.0-GCCcore-11.3.0</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">--dag</span> <span class="kw">|</span> <span class="ex">dot</span> <span class="at">-Tpdf</span> <span class="op">&gt;</span> dag.pdf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>and for execution we additionally need samtools on the command line, e.g.</p>
+<ul>
+<li>For execution we additionally need samtools on the command line, e.g.</li>
+</ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load SAMtools/1.16.1-GCC-11.3.0</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-j</span> 2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2864,10 +2862,10 @@ rule gather:
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="at"> </span><span class="kw">-</span><span class="at"> star = 2.7.0b</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
-<li><p>The <a href="https://anaconda.org/bioconda/">bioconda channel</a> is dedicated to bioinformatics software. Check it to figure out available tool releases!</p></li>
-<li><p>Wrappers for many popular tools are made available at <a href="https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html">https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html</a></p></li>
-<li><p>They provide conda recipes for tool installation and shell directives that wrap calls to the command line</p></li>
-<li><p>The downside of wrappers is that they require internet access during execution (see cluster problem below)</p></li>
+<li>The <a href="https://anaconda.org/bioconda/">bioconda channel</a> is dedicated to bioinformatics software. Check it to figure out available tool releases!</li>
+<li>Wrappers for many popular tools are made available at <a href="https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html">https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html</a></li>
+<li>They provide conda recipes for tool installation and shell directives that wrap calls to the command line</li>
+<li>The downside of wrappers is that they require internet access during execution (see cluster problem below)</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -2908,9 +2906,9 @@ Caution
 <section id="run-snakemake-on-scicore-slurm-cluster" class="level2">
 <h2 class="anchored" data-anchor-id="run-snakemake-on-scicore-slurm-cluster">Run Snakemake on sciCORE slurm cluster</h2>
 <ul>
-<li><p>A big benefit of Snakemake is to scale up/parallelize workflow execution by using cluster or cloud computing</p></li>
-<li><p>Cluster or cloud back-ends require <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources">resource</a> specifications for each job. This is achieved by the <code>resources</code> tag on a per rule basis.</p></li>
-<li><p>Depending on the back-end these could include temporary directory, disk space, required memory or run time.</p></li>
+<li>A big benefit of Snakemake is to scale up/parallelize workflow execution by using cluster or cloud computing</li>
+<li>Cluster or cloud back-ends require <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources">resource</a> specifications for each job. This is achieved by the <code>resources</code> tag on a per rule basis.</li>
+<li>Depending on the back-end these could include temporary directory, disk space, required memory or run time.</li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rule align:</span>
@@ -2943,8 +2941,8 @@ Caution
 <section id="profiles" class="level3">
 <h3 class="anchored" data-anchor-id="profiles">Profiles</h3>
 <ul>
-<li><p>Ideally back-end specifications (e.g. slurm <code>qos</code>) are separated from workflow definitions via specific <a href="https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles">profiles</a>. They tell Snakemake how to communicate with a specific back-end.</p></li>
-<li><p>We provide a simple scicore-surm profile at: <a href="https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git">https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git</a></p></li>
+<li>Ideally back-end specifications (e.g. slurm <code>qos</code>) are separated from workflow definitions via specific <a href="https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles">profiles</a>. They tell Snakemake how to communicate with a specific back-end.</li>
+<li>We provide a simple scicore-surm profile at: <a href="https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git">https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git</a></li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scicore-slurm/</span></span>
@@ -2974,11 +2972,11 @@ Caution
 <section id="additional-resources" class="level1">
 <h1>Additional resources</h1>
 <ul>
-<li><p>Running Snakemake paper <a href="https://f1000research.com/articles/10-33/v3">https://f1000research.com/articles/10-33/v3</a></p></li>
-<li><p>Snakemake docs including long and short tutorials <a href="https://snakemake.readthedocs.io/en/stable/">https://snakemake.readthedocs.io/en/stable/</a></p></li>
-<li><p>Official workflow repository <a href="https://github.com/snakemake-workflows">https://github.com/snakemake-workflows</a></p></li>
-<li><p>Best practices <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html">https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html</a></p></li>
-<li><p>Distribution and Reproducibility <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html">https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html</a></p></li>
+<li>Running Snakemake paper <a href="https://f1000research.com/articles/10-33/v3">https://f1000research.com/articles/10-33/v3</a></li>
+<li>Snakemake docs including long and short tutorials <a href="https://snakemake.readthedocs.io/en/stable/">https://snakemake.readthedocs.io/en/stable/</a></li>
+<li>Official workflow repository <a href="https://github.com/snakemake-workflows">https://github.com/snakemake-workflows</a></li>
+<li>Best practices <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html">https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html</a></li>
+<li>Distribution and Reproducibility <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html">https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html</a></li>
 </ul>
 </section>
 <section id="tasks-for-the-workshop" class="level1">
