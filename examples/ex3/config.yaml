@@ -1,0 +1,2 @@
+samples: ["rna_1", "rna_2", "rna_3"]
+gtf: "../GRCm38_ensdb_102_subset.gtf" # path relative to Snakefile

@@ -1,0 +1,19 @@
+configfile: "config.yaml"
+
+rule all:
+    input: "results/dgel.rds"
+
+rule align:
+    input: "../fastq/{sample}.fq.gz" # file path realtive to Snakefile
+    output: "results/bam/{sample}.bam"
+    shell: "do the alignment..."
+
+rule count:
+    input: "results/bam/{sample}.bam"
+    output: "results/counts/{sample}.txt"
+    shell: "do the counting..."
+
+rule DGEList:
+    input: expand("results/counts/{sample}.txt", sample=config['samples'])
+    output: "results/dgel.rds"
+    script: "create a DGEList object in R..."

@@ -1,0 +1,5 @@
+star:
+  index: "/scicore/data/managed/igenomes/latest/Mus_musculus/Ensembl/GRCm38/Sequence/STARIndex/"
+  options: "--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat"
+feature_counts:
+  options: "-O -M --primary"

@@ -1,0 +1,7 @@
+FileName1	FileName2	SampleName
+rna_1_L1_R1.fq.gz	rna_1_L1_R2.fq.gz	rna_1
+rna_1_L2_R1.fq.gz	rna_1_L2_R2.fq.gz	rna_1
+rna_2_L1_R1.fq.gz	rna_2_L1_R2.fq.gz	rna_2
+rna_2_L2_R1.fq.gz	rna_2_L2_R2.fq.gz	rna_2
+rna_3_L1_R1.fq.gz	rna_3_L1_R2.fq.gz	rna_3
+rna_3_L2_R1.fq.gz	rna_3_L2_R2.fq.gz	rna_3

@@ -1,0 +1,45 @@
+configfile: "config.yaml"
+configfile: "tools.yaml" # sequentially merged into config dictionary
+
+rule all:
+    input: "results/dgel.rds"
+        
+rule align:
+    input: "../fastq/{sample}.fq.gz"
+    output: "results/bam/{sample}/Aligned.sortedByCoord.out.bam"
+    params:
+        index = config["star"]["index"],
+        options = config["star"]["options"]
+    threads:
+        4
+    shell:
+        """
+        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
+        """
+
+rule merge:
+    input: lambda wildcards: expand("results/bam/{sample}/Aligned.sortedByCoord.out.bam", sample=config['groups'][wildcards.group])
+    output: "results/merged/{group}.bam"
+    threads: 2
+    shell: 
+        """
+        samtools merge --threads {threads} {output} {input}
+        """
+
+rule count:
+    input: "results/merged/{sample}.bam"
+    output: "results/counts/{sample}.txt"
+    params:
+        gtf = config["gtf"],
+	extra = config["feature_counts"]["options"]
+    shell:
+        """
+        featureCounts -a {params.gtf} -o {output} {params.extra} {input}
+        """
+
+rule DGEList:
+    input: expand("results/counts/{sample}.txt", sample=config['groups'])
+    output: "results/dgel.rds"
+    params:
+        names = config['groups']
+    script: "scripts/create_dge_list.R"

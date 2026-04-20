@@ -1,0 +1,10 @@
+cluster: "slurm-submit.py"
+cluster-status: "slurm-status.sh"
+max-jobs-per-second: 2
+max-status-checks-per-second: 0.2
+local-cores: 1
+latency-wait: 60
+jobs: 500
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True

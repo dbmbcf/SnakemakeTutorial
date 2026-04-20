@@ -1,0 +1,18 @@
+rule all:
+    input: "dgel.rds"
+
+rule align:
+    input: "sample.fq.gz"
+    output: "sample.bam"
+    shell: "do the alignment..."
+
+rule count:
+    input: "sample.bam"
+    output: "counts.txt"
+    shell: "do the counting..."
+
+rule DGEList:
+    input: "counts.txt"
+    output: "dgel.rds"
+    script: "create a DGEList object in R..."
+    
