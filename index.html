@@ -2201,10 +2201,60 @@ vertical-align: -.125em;
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#why-workflow-managers" id="toc-why-workflow-managers" class="nav-link" data-scroll-target="#why-workflow-managers">Why workflow managers?</a></li>
+  <li><a href="#what-is-snakemake" id="toc-what-is-snakemake" class="nav-link" data-scroll-target="#what-is-snakemake">What is Snakemake?</a></li>
+  <li><a href="#how-to-get-it" id="toc-how-to-get-it" class="nav-link" data-scroll-target="#how-to-get-it">How to get it?</a></li>
+  </ul></li>
+  <li><a href="#example-workflow-read-alignment-and-gene-counting" id="toc-example-workflow-read-alignment-and-gene-counting" class="nav-link" data-scroll-target="#example-workflow-read-alignment-and-gene-counting">Example workflow: read alignment and gene counting</a>
+  <ul class="collapse">
+  <li><a href="#set-up-a-snakefile" id="toc-set-up-a-snakefile" class="nav-link" data-scroll-target="#set-up-a-snakefile">Set up a Snakefile</a>
+  <ul class="collapse">
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1">Example 1</a></li>
+  </ul></li>
+  <li><a href="#generalize-workflows-with-wildcards-and-configuration" id="toc-generalize-workflows-with-wildcards-and-configuration" class="nav-link" data-scroll-target="#generalize-workflows-with-wildcards-and-configuration">Generalize workflows with wildcards and configuration</a>
+  <ul class="collapse">
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2">Example 2</a></li>
+  </ul></li>
+  <li><a href="#run-commands-in-shell-and-script-directives" id="toc-run-commands-in-shell-and-script-directives" class="nav-link" data-scroll-target="#run-commands-in-shell-and-script-directives">Run commands in <code>shell</code> and <code>script</code> directives</a>
+  <ul class="collapse">
+  <li><a href="#example-3" id="toc-example-3" class="nav-link" data-scroll-target="#example-3">Example 3</a></li>
+  </ul></li>
+  <li><a href="#workflows-are-executed-in-three-phases" id="toc-workflows-are-executed-in-three-phases" class="nav-link" data-scroll-target="#workflows-are-executed-in-three-phases">Workflows are executed in three phases</a></li>
+  <li><a href="#input-functions" id="toc-input-functions" class="nav-link" data-scroll-target="#input-functions">Input functions</a>
+  <ul class="collapse">
+  <li><a href="#example-4" id="toc-example-4" class="nav-link" data-scroll-target="#example-4">Example 4</a></li>
+  </ul></li>
+  <li><a href="#manage-tools-via-software-environment-definitions" id="toc-manage-tools-via-software-environment-definitions" class="nav-link" data-scroll-target="#manage-tools-via-software-environment-definitions">Manage tools via software environment definitions</a>
+  <ul class="collapse">
+  <li><a href="#example-5" id="toc-example-5" class="nav-link" data-scroll-target="#example-5">Example 5</a></li>
+  </ul></li>
+  <li><a href="#run-snakemake-on-scicore-slurm-cluster" id="toc-run-snakemake-on-scicore-slurm-cluster" class="nav-link" data-scroll-target="#run-snakemake-on-scicore-slurm-cluster">Run Snakemake on sciCORE slurm cluster</a>
+  <ul class="collapse">
+  <li><a href="#profiles" id="toc-profiles" class="nav-link" data-scroll-target="#profiles">Profiles</a></li>
+  <li><a href="#example-6" id="toc-example-6" class="nav-link" data-scroll-target="#example-6">Example 6</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#additional-resources" id="toc-additional-resources" class="nav-link" data-scroll-target="#additional-resources">Additional resources</a></li>
+  <li><a href="#tasks-for-the-workshop" id="toc-tasks-for-the-workshop" class="nav-link" data-scroll-target="#tasks-for-the-workshop">Tasks for the workshop</a>
+  <ul class="collapse">
+  <li><a href="#task-1" id="toc-task-1" class="nav-link" data-scroll-target="#task-1">Task 1</a></li>
+  <li><a href="#task-2" id="toc-task-2" class="nav-link" data-scroll-target="#task-2">Task 2</a></li>
+  <li><a href="#task-3" id="toc-task-3" class="nav-link" data-scroll-target="#task-3">Task 3</a></li>
+  <li><a href="#hints" id="toc-hints" class="nav-link" data-scroll-target="#hints">Hints</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
