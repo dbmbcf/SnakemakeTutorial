@@ -2,27 +2,28 @@ import os
 configfile: "config.yaml" 
 configfile: "tools.yaml"
 
-localrules: all, merge
+localrules: all, samtools_merge
 
 rule all:
     input: "results/dgel.rds"
 
 rule align:
-    input: "../fastq/{sample}.fq.gz"
+    input:
+        fastq = "../fastq/{sample}.fq.gz",
+        index = os.path.join(config["star"]["index"], "SA"),
     output: "results/bam/{sample}/Aligned.sortedByCoord.out.bam"
     params:
         index_dir = config["star"]["index"],
-        index = os.path.join(config["star"]["index"], "SA"),
         options = config["star"]["options"]
     threads:
         4
     resources:
-        mem_mb = lambda input, params: max(5000, params.index.size_mb + 5000),
-        time = lambda input: 30 if input.bam.size_mb < 2000 else 360,
+        mem_mb = lambda wildcards, input: max(5000, input.size_mb + 5000),
+        time = lambda wildcards, input: 30 if input.size_mb < 2000 else 360,
     conda: "envs/star.yaml"
     shell:
         """
-        STAR --genomeDir {params.index_dir} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
+        STAR --genomeDir {params.index_dir} {params.options} --readFilesIn {input.fastq} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
 
 rule samtools_merge:
