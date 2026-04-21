@@ -18,13 +18,16 @@ rule align:
         STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
 
-rule merge:
+rule samtools_merge:
     input: lambda wildcards: expand("results/bam/{sample}/Aligned.sortedByCoord.out.bam", sample=config['groups'][wildcards.group])
     output: "results/merged/{group}.bam"
     threads: 2
-    wrapper:
-        "v1.1.0/bio/samtools/merge"
-
+    conda: "envs/samtools.yaml"
+    shell:
+        """
+        samtools merge --threads {threads} {output} {input}
+        """
+        
 rule count:
     input: "results/merged/{sample}.bam"
     output: "results/counts/{sample}.txt"

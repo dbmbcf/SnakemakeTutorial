@@ -1,5 +1,5 @@
 star:
-  index: "/scicore/data/managed/igenomes/latest/Mus_musculus/Ensembl/GRCm38/Sequence/STARIndex/"
+  index: "/scicore/home/ivanek/GROUP/snakemake_genomes/mm10/STAR"
   options: "--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat"
 feature_counts:
   options: "-O -M --primary"
