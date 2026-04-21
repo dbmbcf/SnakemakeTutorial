@@ -1,0 +1,47 @@
+configfile: "config.yaml" 
+configfile: "tools.yaml"
+
+rule all:
+    input: "results/dgel.rds"
+
+rule align:
+    input: 
+        fq1="../fastq/{sample}.fq.gz",
+        idx=config["star"]["index"],
+    output: 
+         aln="results/bam/{sample}/Aligned.sortedByCoord.out.bam",
+    params:
+        extra = config["star"]["options"]
+    threads: 4
+    wrapper: 
+        "bio/star/align"
+
+
+rule merge:
+    input: lambda wildcards: expand("results/bam/{sample}/Aligned.sortedByCoord.out.bam", sample=config['groups'][wildcards.group])
+    output: "results/merged/{group}.bam"
+    threads: 2
+    wrapper:
+        "bio/samtools/merge"
+
+rule count:
+    input: 
+        samples="results/merged/{sample}.bam",
+        annotation=config["gtf"],
+    output: 
+        "results/counts/{sample}.txt",
+    params:
+        extra = config["feature_counts"]["options"]
+    wrapper:
+        "bio/subread/featurecounts"
+
+rule DGEList:
+    input: expand("results/counts/{sample}.txt", sample=config['groups'])
+    output: "results/dgel.rds"
+    params:
+        names = config['groups']
+    conda: 
+        "envs/r_edger.yaml"
+    script: 
+        "scripts/create_dge_list.R"
+

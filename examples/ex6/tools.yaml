@@ -1,0 +1,5 @@
+star:
+  index: "/scicore/home/ivanek/GROUP/snakemake_genomes/mm10/STAR/"
+  options: "--outSAMtype BAM SortedByCoordinate"
+feature_counts:
+  options: "-O -M --primary"
