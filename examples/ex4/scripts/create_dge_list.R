@@ -1,3 +1,9 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type="output")
+sink(log, type="message")
+
+.libPaths(c(snakemake@params[["r_lib"]], .libPaths())) 
+
 library(edgeR)
 
 res <- lapply(snakemake@input, function(fn) {
