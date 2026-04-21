@@ -1,6 +1,0 @@
-channels:
- - bioconda
-dependencies:
- - r-base = 4.1.2
- - bioconductor-biocversion = 3.14.0
- - bioconductor-edger

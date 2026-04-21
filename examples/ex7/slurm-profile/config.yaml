@@ -1,0 +1,13 @@
+executor: cluster-generic
+cluster-generic-submit-cmd: "submit.py"
+cluster-generic-status-cmd: "check_status.sh"
+cluster-generic-cancel-cmd: "scancel"
+max-jobs-per-second: 5
+max-status-checks-per-second: 0.2
+local-cores: 1
+latency-wait: 60
+jobs: 500
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+software-deployment-method: conda
