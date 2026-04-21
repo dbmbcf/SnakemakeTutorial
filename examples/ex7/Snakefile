@@ -23,7 +23,7 @@ rule align:
     conda: "envs/star.yaml"
     shell:
         """
-        STAR --genomeDir {params.index_dir} {params.options} --readFilesIn {input.fastq} --outFileNamePrefix results/bam/{wildcards.sample}/
+        STAR --genomeDir {params.index_dir} --runThreadN {threads} {params.options} --readFilesIn {input.fastq} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
 
 rule samtools_merge:

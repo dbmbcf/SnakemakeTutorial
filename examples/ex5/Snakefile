@@ -15,7 +15,7 @@ rule align:
     conda: "envs/star.yaml"
     shell:
         """
-        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
+        STAR --genomeDir {params.index} --runThreadN {threads} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
 
 rule samtools_merge:

@@ -15,7 +15,7 @@ rule align:
     envmodules: "STAR/2.7.10b-GCC-11.3.0"    
     shell:
         """
-        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
+        STAR --genomeDir {params.index} --runThreadN {threads} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
 
 rule merge:
