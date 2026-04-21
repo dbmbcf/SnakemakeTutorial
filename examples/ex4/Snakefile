@@ -31,7 +31,7 @@ rule count:
     output: "results/counts/{sample}.txt"
     params:
         gtf = config["gtf"],
-	extra = config["feature_counts"]["options"]
+        extra = config["feature_counts"]["options"]
     shell:
         """
         featureCounts -a {params.gtf} -o {output} {params.extra} {input}

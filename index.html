@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Florian Geier (florian.geier@unibas.ch), Igor Cervenka (igor.cervenka@unibas.ch)">
-<meta name="dcterms.date" content="2026-04-20">
+<meta name="dcterms.date" content="2026-04-21">
 
 <title>Introduction to Snakemake</title>
 <style>
@@ -2201,10 +2201,40 @@ vertical-align: -.125em;
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#why-workflow-managers" id="toc-why-workflow-managers" class="nav-link" data-scroll-target="#why-workflow-managers">Why workflow managers?</a></li>
+  <li><a href="#what-is-snakemake" id="toc-what-is-snakemake" class="nav-link" data-scroll-target="#what-is-snakemake">What is Snakemake?</a></li>
+  <li><a href="#how-to-get-it" id="toc-how-to-get-it" class="nav-link" data-scroll-target="#how-to-get-it">How to get it?</a></li>
+  </ul></li>
+  <li><a href="#example-workflow-read-alignment-and-gene-counting" id="toc-example-workflow-read-alignment-and-gene-counting" class="nav-link" data-scroll-target="#example-workflow-read-alignment-and-gene-counting">Example workflow: read alignment and gene counting</a>
+  <ul class="collapse">
+  <li><a href="#set-up-snakefile" id="toc-set-up-snakefile" class="nav-link" data-scroll-target="#set-up-snakefile">Set up Snakefile</a></li>
+  <li><a href="#generalize-workflows-with-wildcards-and-configuration" id="toc-generalize-workflows-with-wildcards-and-configuration" class="nav-link" data-scroll-target="#generalize-workflows-with-wildcards-and-configuration">Generalize workflows with wildcards and configuration</a></li>
+  <li><a href="#run-commands-in-shell-and-script-directives" id="toc-run-commands-in-shell-and-script-directives" class="nav-link" data-scroll-target="#run-commands-in-shell-and-script-directives">Run commands in <code>shell</code> and <code>script</code> directives</a></li>
+  <li><a href="#workflows-are-executed-in-three-phases" id="toc-workflows-are-executed-in-three-phases" class="nav-link" data-scroll-target="#workflows-are-executed-in-three-phases">Workflows are executed in three phases</a></li>
+  <li><a href="#input-functions" id="toc-input-functions" class="nav-link" data-scroll-target="#input-functions">Input functions</a></li>
+  <li><a href="#manage-tools-via-software-environment-definitions" id="toc-manage-tools-via-software-environment-definitions" class="nav-link" data-scroll-target="#manage-tools-via-software-environment-definitions">Manage tools via software environment definitions</a></li>
+  <li><a href="#run-snakemake-on-scicore-slurm-cluster" id="toc-run-snakemake-on-scicore-slurm-cluster" class="nav-link" data-scroll-target="#run-snakemake-on-scicore-slurm-cluster">Run Snakemake on sciCORE slurm cluster</a></li>
+  </ul></li>
+  <li><a href="#additional-resources" id="toc-additional-resources" class="nav-link" data-scroll-target="#additional-resources">Additional resources</a></li>
+  <li><a href="#tasks-for-the-workshop" id="toc-tasks-for-the-workshop" class="nav-link" data-scroll-target="#tasks-for-the-workshop">Tasks for the workshop</a>
+  <ul class="collapse">
+  <li><a href="#task-1" id="toc-task-1" class="nav-link" data-scroll-target="#task-1">Task 1</a></li>
+  <li><a href="#task-2" id="toc-task-2" class="nav-link" data-scroll-target="#task-2">Task 2</a></li>
+  <li><a href="#task-3" id="toc-task-3" class="nav-link" data-scroll-target="#task-3">Task 3</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
@@ -2227,7 +2257,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 20, 2026</p>
+      <p class="date">April 21, 2026</p>
     </div>
   </div>
   
@@ -2258,6 +2288,7 @@ vertical-align: -.125em;
 <li>Highly readable mini-language</li>
 <li>Adaptable due to modular organization: rules, wrappers, sub-workflows</li>
 <li>Extended support for many scripting languages (bash, R, markdown etc.)</li>
+<li>Clever job scheduling</li>
 <li>Scaleable to different computational resources: server, cluster and cloud</li>
 <li>Portable by self-contained management of software stack via conda</li>
 </ul></li>
@@ -2266,8 +2297,21 @@ vertical-align: -.125em;
 <section id="how-to-get-it" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-get-it">How to get it?</h2>
 <ul>
-<li>Pre-requisite: get conda via miniforge <a href="https://github.com/conda-forge/miniforge">https://github.com/conda-forge/miniforge</a> and follow the installation instructions.</li>
+<li><p>Pre-requisite: get conda via miniforge <a href="https://github.com/conda-forge/miniforge">https://github.com/conda-forge/miniforge</a> and follow the installation instructions.</p></li>
+<li><p>Set up a conda configuration file (<code>$HOME/.condarc</code>), listing the following channel order to pick packages from:</p></li>
 </ul>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.condarc</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">channels</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> bioconda</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">channel_priority</span><span class="kw">:</span><span class="at"> strict</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">auto_activate</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="co"> # don&#39;t activate base environment by default</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2284,19 +2328,6 @@ Important
 </ul>
 </div>
 </div>
-<ul>
-<li>Set up a conda configuration file (<code>$HOME/.condarc</code>), listing the following channel order to pick packages from:</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>.condarc</strong></pre>
-</div>
-<pre data-filename=".condarc"><code>channels:
-  - conda-forge
-  - bioconda
-channel_priority: strict
-auto_activate: false # don&#39;t activate base env on login</code></pre>
-</div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2311,71 +2342,96 @@ auto_activate: false # don&#39;t activate base env on login</code></pre>
 </div>
 </div>
 <ul>
-<li>Now, use conda to install snakemake:</li>
+<li>Use conda to install snakemake:</li>
 </ul>
-<pre><code>conda create -n snakemake snakemake=8.30 snakemake-executor-plugin-cluster-generic</code></pre>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> snakemake_8 snakemake=8.30 snakemake-executor-plugin-cluster-generic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <ul>
-<li>The additional package <code>snakemake-executor-plugin-cluster-generic</code> is required for the slurm profile (see below)</li>
+<li><p>The additional package <code>snakemake-executor-plugin-cluster-generic</code> is required in order to use the scicore-slurm profile (see below)</p></li>
+<li><p>Now, activate the environment with:</p></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate snakemake_8</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
 </section>
 <section id="example-workflow-read-alignment-and-gene-counting" class="level1">
 <h1>Example workflow: read alignment and gene counting</h1>
-<section id="set-up-a-snakefile" class="level2">
-<h2 class="anchored" data-anchor-id="set-up-a-snakefile">Set up a Snakefile</h2>
+<section id="set-up-snakefile" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-snakefile">Set up Snakefile</h2>
+<ul>
+<li><p>A <code>Snakefile</code> is a collection of rules defined in the Snakemake mini-language.</p></li>
+<li><p>Each rule describes how to create a (set of) output file(s) from a (set of) input file(s).</p></li>
+<li><p>Dependencies between rule-derived jobs are implicitly encoded via matching of file name patterns.</p></li>
+</ul>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
-<pre><strong>Snakefile</strong></pre>
+<pre><strong>Example1: Snakefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;dgel.rds&quot;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>rule align:</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;sample.fq.gz&quot;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;sample.bam&quot;</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the alignment...&quot;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>rule count:</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;sample.bam&quot;</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;counts.txt&quot;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the counting...&quot;</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;counts.txt&quot;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;dgel.rds&quot;</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;create a DGEList object in R...&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>rule align:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;sample.fq.gz&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;sample.bam&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the alignment...&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>rule count:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;sample.bam&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;counts.txt&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the counting...&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;counts.txt&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;dgel.rds&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;create a DGEList object in R...&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
-<li>The Snakefile contains rules where each describes how to create a (set of) output file(s) from a (set of) input file(s)</li>
-<li>Dependencies between rule-derived jobs are implicitly encoded via matching of file name patterns</li>
-<li>A pseudo-rule (first rule, often called <code>all</code>) specifies the desired output (=target)</li>
+<li><p>This dummy example doesn’t do anything, but highlights how fixed file name patterns connect the different rules into one workflow. It also assumes that the file <code>sample.fq.gz</code> is present.</p></li>
+<li><p>Invoking Snakemake on this first example requires to specify the desired output (=final target):</p></li>
+<li><p>Runs only alignment step</p></li>
 </ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-n</span> sample.bam</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img role="img" src="data:image/png;base64,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Xl8/jbpGUjJEqi9aPWp9PR4PO3fu5K677gJg5syZnHfeefztb3+TO7s+6uvraWlpGdX3nIvm5mYWLVrEihUraG1t5cUXX+QXv/gFy5YtG1Nau1/w0ZXexUxd4vlXEPxodY1kZIjMHIO+I2U05+54Y1I7u6+++ir83GjWLAB2797NiRMnznkSu/LKK3n44Yd57733+NGPfsTu3bv56KOPWLx48WSFHYXK5cJy8iSWqqqYxXDmzJlhm0UQBEwmE7m5udzf1YVXEJifljZuRqmqquLRRx/l7bffpqqqit27d7Np0yZeffVVnnnmGd59912uvvpqOjo62LNnDw899BAARUVFpKSk8Prrr7N69Wp27drF6RHUHFWr1ROSjORSqThpsVBlsYz7Zw+X0eq7vut+fIKXirT5I9K3s7OTs2fPypmza9euxWw288tf/hIAnU7Hb3/7Wx544AG+973vUVVVhc/nY8+ePYMmrdhstkGnFhQUFMhDoc3NzVHviUzEqKmp4aGHHmLv3r2YzWZ++MMfsnnzZvn10ervUrn4ynKSKkvi+be9634EwYthhPqOldGcu+ONSe3srr76ajZv3sz06dMxGAzMnz+f22+/nfvvv59333130P9z2WWX8eyzz7Jq1SpCoRDl5eVceeWV6GJ41Z0omEwmOYU5JSUstXcCanqWl5fzzDPPcP3115OZmUlGRgZPP/00l19+OU888QTXXnstF1xwAa2trdx4443ccsstQPgEet9993Hbbbdx//33c8kll4wo2eC6666juroar9crP9OdSgymr697dMO89957r5xdN3PmTK644goeeugh9Hq9/J477riDnp4eVq1aRTAYJCUlhfT0dDZu3Mjnn3/e7/MefPBBOYksksOHD8tDo3fccUfU63/961/l7auuuorf//73WCwWSktL6ezs5He/+53csSa7/oPp2zFKfcfKaM7d8YYQGtA1N0hJBunz52O5554J+dKTJ09iMpnkeVNNTU1YLJZBr1QcDgddXV3k5+fj8XjQ6XRceeWV3HXXXVTF4M5qMtpnOJw5c2bQK2e9Xo/ZbCYvL2/QC4IVUtLF/PR07hnnOxeXy0VLSwuFhYX99nd1dfHll19y4YUXkpWVFfX/uru78fl8ZEcU2h4uXV1dpKWlySeDsTKR7TMSRqvvyobw77MifT5rLBPz+/R6vdTV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" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## produced with </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## snakemake --dag sample.bam | dot -Tpng -Grankdir=LR &gt; ex1.png</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">&#39;figures/ex1_align.png&#39;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Runs alignment and counting</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-n</span> counts.txt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">&#39;figures/ex1_counts.png&#39;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Runs all three steps</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-n</span> dgel.rds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">&#39;figures/ex1_dgel.png&#39;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
 </div>
 </div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Note, all these cases were dry-runs (flag <code>-n</code>), since we didn’t provide any functionality to the individual steps .</li>
+</ul>
 </div>
-<section id="example-1" class="level3">
-<h3 class="anchored" data-anchor-id="example-1">Example 1</h3>
-<ul>
-<li><p>The first example uses the above <code>Snakefile</code> and the file <code>sample.fq.gz</code> (which is the required input of rule <code>align</code>). Both are assumed to be in the execution directory.</p></li>
-<li><p>Snakemake will read the <code>Snakefile</code>, and without specifying any desired output (=targets) via the command line, will use the first rule (<code>all</code>) to determine the desired output</p></li>
-</ul>
-<pre><code>snakemake -n</code></pre>
-<ul>
-<li>By specifying an intermediate target as the final target, we can run a partial workflow</li>
-</ul>
-<pre><code>snakemake -n sample.bam</code></pre>
-<ul>
-<li>Note, all these cases were dry-runs (flag <code>-n</code>), since we didn’t provide any functionality to the individual steps</li>
-</ul>
-</section>
+</div>
 </section>
 <section id="generalize-workflows-with-wildcards-and-configuration" class="level2">
 <h2 class="anchored" data-anchor-id="generalize-workflows-with-wildcards-and-configuration">Generalize workflows with wildcards and configuration</h2>
@@ -2384,41 +2440,58 @@ auto_activate: false # don&#39;t activate base env on login</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>Snakefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>rule align:</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the alignment...&quot;</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>rule count:</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the counting...&quot;</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;samples&#39;</span>])</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;create a DGEList object in R...&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>rule align:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the alignment...&quot;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>rule count:</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    shell: <span class="st">&quot;do the counting...&quot;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;samples&#39;</span>])</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;create a DGEList object in R...&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
-<li>In order to generalize rules, Snakemake allows to match input and output files with wildcards. There are a couple of rules:
+<li><p>In order to generalize rules, Snakemake allows to use wildcards in input and output file names.</p></li>
+<li><p>Wildcards follow a few basic principles:</p>
 <ul>
-<li>Wildcard matches are propagated to the input files and to the variable wildcards</li>
-<li>Wildcards should be named the same in input and output</li>
+<li>They are rule specific</li>
+<li>In order to propagate wildcard matches from output to input files (and to the variable <code>wildcards</code>) they have to be named the same in input and output (and params etc.)</li>
 <li>Not all output wildcards must be present in input</li>
-<li>Wildcards can be constrained in the output</li>
+<li>Wildcards can be constrained with the keyword <code>wildcard_constraints</code></li>
 </ul></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
 <li>For example, all files in the fastq folder will be matched by the input pattern of rule <code>align</code>:</li>
 </ul>
-<pre><code>fastq/
-├── rna_1.fq.gz
-├── rna_2.fq.gz
-└── rna_3.fq.gz</code></pre>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastq/</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> rna_1.fq.gz</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> rna_2.fq.gz</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> rna_3.fq.gz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
 <p>(Note: In the example above the fastq file paths are written relative to the Snakefile)</p>
 <ul>
 <li>A globally available <code>config</code> dictionary hosts all workflow configurations. It can be filled with values from the command line or by reading from separate <a href="https://yaml.org/">YAML files</a>, such as <code>config.yaml</code>:</li>
@@ -2428,92 +2501,80 @@ auto_activate: false # don&#39;t activate base env on login</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>config.yaml</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>samples: [<span class="st">&quot;rna_1&quot;</span>, <span class="st">&quot;rna_2&quot;</span>, <span class="st">&quot;rna_3&quot;</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>samples: [<span class="st">&quot;rna_1&quot;</span>, <span class="st">&quot;rna_2&quot;</span>, <span class="st">&quot;rna_3&quot;</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
-<li>The expression <code>expand(&quot;counts/{sample}.txt&quot;, sample=config[&#39;samples&#39;])</code> allows to gather input files. It is a shortcut for a <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">python list comprehension</a>.</li>
+<li><p>The expression <code>expand(&quot;counts/{sample}.txt&quot;, sample=config[&#39;samples&#39;])</code> allows to gather input files. It is a shortcut for a <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">python list comprehension</a>.</p></li>
+<li><p>The first rule of a Snakefile (often called rule <code>all</code>) plays a special rule: if no target is specified via the command line Snakemake assumes the input of the first rule is the required target (in our case <code>results/dgel.rds</code>)</p></li>
+<li><p>Calling <code>snakemake -n</code> on the example will therefore produce a workflow from alignment till DGEList creation.</p></li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img role="img" src="data:image/png;base64,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4ihenVfbz3WFVFbi6xW9C8DCec/m3fZzWSGVEzhrftg2pGvwZPLcc89hMBi46qqraGxs5Gtf+xqf//znsx2WyEFSVsRYTOZykrfVXKnwyU9+km3btjF9+nTWrVvHFVdcwcMPP5ztsEQOkrIixmIyl5NJfWdSUVHBs89OrttucW6krIixmMzlpCDvTCbDTJ4iNaSsiLGQcjK6gkwmQgghMkuSSQ76u7/7OxRFQVEUDIZJXRMpRrF9+3bWrl1LSUkJdXV13HXXXfT1pX+FTZFfGhoauOWWW6iqqqKqqoqbbrqJlpaWlO5DkkkO+pd/+RdUVeW3v/1ttkMROe6BBx7gK1/5Ck1NTbz66qu89dZb3H333dkOS+SYn/70p9x4440cPXqUXbt24fV6U97LLCXJ5PHHH2fmzJnYbDYuvfRSdu/erT032pTOy5cv57777uPSSy/FbrezaNEi3nvvPR5++GHq6+spKSnhi1/8IrFYbNB77r//fi699FIcDgcrV65kx44dI8bn9Xq55557mD59OqWlpaxbt46TJ09qz3//+99nzpw5I75/+fLlfOMb3+ATn/gExcXFPPvss6NOJT3eqawnCykrqS0rr732GldeeSUOh4PFixdz55138sc//nFM781lUk5SW04efvhh1q9fT2lpKdOmTeNv/uZv+PDDD8f03jFTz3Dwo5vUgx/dpDa3PnrmU8P66KOPVKPRqL799tuq3+9X3333XXXz5s1DXheJRNTdu3erc+bMUZ9++mnt8WXLlqkzZsxQP/zwQ9Xj8ai33367WlxcrN55551qV1eXeuTIEbWmpkZ9/vnnB72nrKxMffPNN1W3261+//vfVx0Oh+pyuVRVVdULL7xQ/dnPfqa9fv369eo111yjNjY2qm63W/3KV76irlixQo1Go6qqquqDDz6ozp49e8TPuGzZMrWmpkbdsWOHGolEtMemTZumvvfee6rP51MfeOAB1el0qrFYbEyfeyx++9vfqnq9flzvGeDue1c7lu6+d89pG6nevpSV9JWV5PjXr18/rvc0tz6qHct0GO/2pZykt5y0tLSo1157rXrTTeM/3mfJD89POJk0NjaqNptN3b9//5he/9hjjw36EMuWLVN/9KMfaf9/8803VUVRVK/Xqz3213/91+r/+T//Z9B7vv71rw/a7sKFC9V//dd/VVV18IFvampS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" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:85.0%"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">&#39;figures/ex2.png&#39;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-</div>
-<section id="example-2" class="level3">
-<h3 class="anchored" data-anchor-id="example-2">Example 2</h3>
-<pre><code>snakemake -n</code></pre>
 <ul>
 <li>Specifying samples via command line allows to overwrite the settings in <code>config.yaml</code>:</li>
 </ul>
-<pre><code>snakemake -n --config samples=[rna_2]</code></pre>
-</section>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-n</span> <span class="at">--config</span> samples=<span class="pp">[</span><span class="ss">rna_2</span><span class="pp">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
 <section id="run-commands-in-shell-and-script-directives" class="level2">
 <h2 class="anchored" data-anchor-id="run-commands-in-shell-and-script-directives">Run commands in <code>shell</code> and <code>script</code> directives</h2>
 <ul>
-<li>In order to be functional we need to fill the <code>shell</code> and <code>script</code> directives of each rule with appropriate calls of the software tools</li>
+<li>In order to be functional we need to fill the <code>shell</code> and <code>script</code> directives of each rule with appropriate calls of the software tools.</li>
 </ul>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Snakefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>rule count:</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;samples&#39;</span>])</span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;samples&#39;</span>]</span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;STAR/2.7.10b-GCC-11.3.0&quot;</span>    </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>rule count:</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;Subread/2.0.6-GCC-11.3.0&quot;</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;samples&#39;</span>])</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;samples&#39;</span>]</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;R/4.5.2-gfbf-2025b-bare&quot;</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
 <li><p>The <code>shell</code> directive is used for code running in bash (strict mode). It can access all local and global variables (<code>wildcards</code>, <code>input</code>, <code>output</code> etc.)</p></li>
 <li><p>The <code>params</code> slot allows to handle additional rule-specific parameters such as the STAR index or tool options. In our example, these options are taken from another configuration file (<code>tools.ymal</code>):</p></li>
 </ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>config.yaml</strong></pre>
-</div>
-<pre data-filename="config.yaml"><code>star:
-  index: &quot;/scicore/home/ivanek/GROUP/genomes/mm10/STAR_2.7.0c&quot;
-  options: &quot;--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat&quot;
-feature_counts:
-  options: &quot;-O -M --primary&quot;</code></pre>
-</div>
+<p><code>{.yaml, filename=&quot;tools.yaml&quot;} star:   index: &quot;/scicore/home/ivanek/GROUP/snakemake_genomes/mm10/STAR/SA&quot;   options: &quot;--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat&quot; feature_counts:   options: &quot;-O -M --primary&quot;</code></p>
 <ul>
 <li><p>Snakemake offers special support for a couple of <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#snakefiles-external-scripts">scripting languages</a></p></li>
 <li><p>R scripts will be wrapped with code to make local and global variables transparent in a <code>snakemake</code> object, such as <code>input</code>, <code>output</code>, <code>params</code>, <code>wildcards</code> or <code>config</code></p></li>
@@ -2524,20 +2585,20 @@ feature_counts:
 <div class="code-with-filename-file">
 <pre><strong>create_dge_list.R</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(edgeR)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">lapply</span>(snakemake<span class="sc">@</span>input, <span class="cf">function</span>(fn) {</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    df <span class="ot">&lt;-</span> <span class="fu">read.table</span>(fn, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">row.names=</span><span class="dv">1</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    df[,<span class="fu">ncol</span>(df),drop<span class="ot">=</span><span class="cn">FALSE</span>]</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">do.call</span>(<span class="st">&#39;cbind&#39;</span>, res)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mat) <span class="ot">&lt;-</span> snakemake<span class="sc">@</span>params[[<span class="st">&quot;names&quot;</span>]]</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>dgel <span class="ot">&lt;-</span> <span class="fu">DGEList</span>(<span class="at">counts=</span>mat)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dgel, <span class="at">file=</span>snakemake<span class="sc">@</span>output[[<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(edgeR)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">lapply</span>(snakemake<span class="sc">@</span>input, <span class="cf">function</span>(fn) {</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    df <span class="ot">&lt;-</span> <span class="fu">read.table</span>(fn, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">row.names=</span><span class="dv">1</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    df[,<span class="fu">ncol</span>(df),drop<span class="ot">=</span><span class="cn">FALSE</span>]</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">do.call</span>(<span class="st">&#39;cbind&#39;</span>, res)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(mat) <span class="ot">&lt;-</span> snakemake<span class="sc">@</span>params[[<span class="st">&quot;names&quot;</span>]]</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>dgel <span class="ot">&lt;-</span> <span class="fu">DGEList</span>(<span class="at">counts=</span>mat)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dgel, <span class="at">file=</span>snakemake<span class="sc">@</span>output[[<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
@@ -2555,46 +2616,43 @@ Tip
 <div class="callout-body-container callout-body">
 <p>In order to redirect messages to a rule-specific log file you can add at the beginning of an R script the following lines:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>log <span class="ot">&lt;-</span> <span class="fu">file</span>(snakemake<span class="sc">@</span>log[[<span class="dv">1</span>]], <span class="at">open =</span> <span class="st">&quot;wt&quot;</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(log, <span class="at">type=</span><span class="st">&quot;output&quot;</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(log, <span class="at">type=</span><span class="st">&quot;message&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>log <span class="ot">&lt;-</span> <span class="fu">file</span>(snakemake<span class="sc">@</span>log[[<span class="dv">1</span>]], <span class="at">open =</span> <span class="st">&quot;wt&quot;</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(log, <span class="at">type=</span><span class="st">&quot;output&quot;</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(log, <span class="at">type=</span><span class="st">&quot;message&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This requires a <code>log</code> directive in the rule!</p>
 </div>
 </div>
 <ul>
-<li>Via <code>threads</code> one can assign multiple cores to a rule and also parallelize the execution of rules. As we run Snakemake locally <code>threads</code> will be adjusted to the number of cores made available via he command line (<code>-j</code> flag)</li>
+<li><p>Via <code>threads</code> one can assign multiple cores to a rule and also parallelize the execution of rules. As we run Snakemake locally <code>threads</code> will be adjusted to the number of cores made available via he command line (<code>-c</code> flag)</p></li>
+<li><p>As workflow now depends on external tools (STAR, featureCounts and R), these must be available on the command line. sciCORE provides a few software modules, which can be called on a per-rule basis using the <code>envmodules</code> statement.</p></li>
 </ul>
-<section id="example-3" class="level3">
-<h3 class="anchored" data-anchor-id="example-3">Example 3</h3>
-<ul>
-<li>As workflow now depends on external tools (STAR, featureCounts and R), these must be available on the command line. On sciCORE, e.g. by loading the following modules beforehand:</li>
-</ul>
-<pre><code>module load STAR/2.7.10b-GCC-11.3.0
-module load Subread/2.0.6-GCC-11.3.0
-module load R/4.2.1-foss-2022a # last compatible tool-chain, contains the edgeR library</code></pre>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Calling modules beforehand assumes we run the workflow on a single machine. Usually modules are called dynamically on a per-rule basis using the Snakemake directive <code>envmodules</code>. However we do not recommend to use sciCORE modules to deploy software. Instead, we will use conda to define rule specific software environments.</p>
+<p>We do not recommend to use sciCORE modules, due to limited availability and lack of workflow portability. Instead, we recommend to use conda to deploy software environments (see below).</p>
 </div>
 </div>
 <ul>
-<li>Running Snakemake with 2 cores (option <code>-j 2</code>) will also run the <code>align</code> rule with just 2 threads</li>
+<li><p>Running Snakemake on the example require setting the command line flag <code>--software-deployment-method</code> or short <code>--sdm</code> to activate the sciCORE module system.</p></li>
+<li><p>Running Snakemake with 8 cores allows to run alignments in parallel:</p></li>
 </ul>
-<pre><code>snakemake -j 2</code></pre>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">--sdm</span> env-modules <span class="at">-c</span> 8 </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <ul>
-<li>Providing 8 cores allows to run alignments in parallel</li>
+<li>Choosing just 2 cores will also run the <code>align</code> rule with just 2 threads:</li>
 </ul>
-<pre><code>snakemake -j 8</code></pre>
-</section>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">--sdm</span> env-modules <span class="at">-c</span> 2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
 <section id="workflows-are-executed-in-three-phases" class="level2">
 <h2 class="anchored" data-anchor-id="workflows-are-executed-in-three-phases">Workflows are executed in three phases</h2>
@@ -2616,79 +2674,81 @@ Tip
 <section id="input-functions" class="level2">
 <h2 class="anchored" data-anchor-id="input-functions">Input functions</h2>
 <ul>
-<li>Often wildcards are unknown (= cannot be decoded from file patterns) at initialization phase</li>
-<li>Rule specification can make use of input functions which defer determination of input files to the DAG phase, when wildcard values are known</li>
-<li>Using input function overrides the default mechanism of replacing wildcards with their values inferred from the output files. You have to take care of that yourself with the given wildcards object.</li>
+<li><p>Often wildcards are unknown (= cannot be decoded from file patterns) at initialization phase</p></li>
+<li><p>Rule specification can make use of input functions which defer determination of input files to the DAG phase, when wildcard values are known</p></li>
+<li><p>Using input function overrides the default mechanism of replacing wildcards with their values inferred from the output files. You have to take care of that yourself with the given wildcards object.</p></li>
+<li><p>In the example below samples are split over different numbers of sequencing lanes. We would like to merge alignment results across lanes with the help of <code>samtools</code>.</p></li>
 </ul>
-<section id="example-4" class="level3">
-<h3 class="anchored" data-anchor-id="example-4">Example 4</h3>
+<div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>config.yaml</strong></pre>
 </div>
-<pre data-filename="config.yaml"><code>samples: [&quot;rna_1&quot;, &quot;rna_2&quot;, &quot;rna_3&quot;]
-groups:
-  lane1: [&quot;rna_1&quot;, &quot;rna_2&quot;]
-  lane2: [&quot;rna_3&quot;]</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>samples: [<span class="st">&quot;rna_1&quot;</span>, <span class="st">&quot;rna_2&quot;</span>, <span class="st">&quot;rna_3&quot;</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>groups:</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  lane1: [<span class="st">&quot;rna_1&quot;</span>, <span class="st">&quot;rna_2&quot;</span>]</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  lane2: [<span class="st">&quot;rna_3&quot;</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Snakefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>rule merge:</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="kw">lambda</span> wildcards: expand(<span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>][wildcards.group])</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/merged/</span><span class="sc">{group}</span><span class="st">.bam&quot;</span></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    threads: <span class="dv">2</span></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">        samtools merge --threads {threads} {output} {input}</span></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>rule count:</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/merged/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>])</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;groups&#39;</span>]</span>
-<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;STAR/2.7.10b-GCC-11.3.0&quot;</span>    </span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>rule merge:</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="kw">lambda</span> wildcards: expand(<span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>][wildcards.group])</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/merged/</span><span class="sc">{group}</span><span class="st">.bam&quot;</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    threads: <span class="dv">2</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;SAMtools/1.20-GCC-13.2.0&quot;</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a><span class="co">        samtools merge --threads {threads} {output} {input}</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>rule count:</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/merged/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;Subread/2.0.6-GCC-11.3.0&quot;</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>])</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;groups&#39;</span>]</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>    envmodules: <span class="st">&quot;R/4.5.2-gfbf-2025b-bare&quot;</span></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<ul>
-<li>We can visualize the resulting DAG with:</li>
-</ul>
-<pre><code>snakemake --dag | dot -Tpdf &gt; dag.pdf</code></pre>
-<p>and for execution we additionally need samtools on the command line, e.g.</p>
-<pre><code>module load SAMtools/1.9-foss-2018b</code></pre>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">&#39;figures/ex4.png&#39;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2700,20 +2760,22 @@ groups:
 </div>
 <div class="callout-body-container callout-body">
 <p>In some cases you want to have your input functions return named input files. This can be done by having them return dict() objects with the names as the dictionary keys and the file names as the dictionary values. You can use different ways of un-packing the input.</p>
-<pre><code>def myfunc1():
-    return [&#39;foo.txt&#39;]
-
-def myfunc2():
-    return {&#39;foo&#39;: &#39;nowildcards.txt&#39;}
-
-def myfunc3(wildcards):
-    return {&#39;foo&#39;: &#39;{wildcards.token}.txt&#39;.format(wildcards=wildcards)}
-
-rule:
-    input:
-        *myfunc1(), # unpack list
-        **myfunc2(), # unpack dict
-        unpack(myfunc3), # unpack wildcards</code></pre>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> myfunc1():</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [<span class="st">&#39;foo.txt&#39;</span>]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> myfunc2():</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">&#39;foo&#39;</span>: <span class="st">&#39;nowildcards.txt&#39;</span>}</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> myfunc3(wildcards):</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">&#39;foo&#39;</span>: <span class="st">&#39;</span><span class="sc">{wildcards.token}</span><span class="st">.txt&#39;</span>.<span class="bu">format</span>(wildcards<span class="op">=</span>wildcards)}</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>rule:</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>:</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>myfunc1(), <span class="co"># unpack list</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>myfunc2(), <span class="co"># unpack dict</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        unpack(myfunc3), <span class="co"># unpack wildcards</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div>
 </div>
 <!--
@@ -2722,7 +2784,7 @@ rule:
 - Converging nodes: input uses function `expand()` (rule `gather`)
 - Diverging nodes: output defines additional wildcard (rule `scatter`)
 
-```{}
+```{.yaml}
 intervals: [1,3,5,7,9]
 ```
 
@@ -2745,85 +2807,70 @@ rule gather:
 
 -->
 </section>
-</section>
 <section id="manage-tools-via-software-environment-definitions" class="level2">
 <h2 class="anchored" data-anchor-id="manage-tools-via-software-environment-definitions">Manage tools via software environment definitions</h2>
 <ul>
-<li>What if the tool we are interested in isn’t available as a module? Snakemake supports software installation (=environment creation) via the package manager <a href="https://docs.conda.io/en/latest/">conda</a> as well as wrappers to popular tools.</li>
+<li>Snakemake supports rule-specific software deployment via the package manager <a href="https://docs.conda.io/en/latest/">conda</a>. Thus, each job is run in a separate, self-contained software environment.</li>
 </ul>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Snakefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/star.yaml&quot;</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>rule merge:</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="kw">lambda</span> wildcards: expand(<span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>][wildcards.group])</span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/merged/</span><span class="sc">{group}</span><span class="st">.bam&quot;</span></span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    threads: <span class="dv">2</span></span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    wrapper:</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;v1.1.0/bio/samtools/merge&quot;</span></span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>rule count:</span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/merged/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/subread.yaml&quot;</span></span>
-<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    shell:</span>
-<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
-<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
-<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
-<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>])</span>
-<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
-<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>    params:</span>
-<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;groups&#39;</span>]</span>
-<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/r_edger.yaml&quot;</span></span>
-<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;tools.yaml&quot;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>configfile: <span class="st">&quot;config.yaml&quot;</span> <span class="co"># merged into tools dictionary; allows to overwrite defaults in tools.yaml </span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>rule <span class="bu">all</span>:</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>rule align:</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;../fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;index&quot;</span>],</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> config[<span class="st">&quot;star&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    threads:</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/star.yaml&quot;</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>rule merge:</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="kw">lambda</span> wildcards: expand(<span class="st">&quot;results/bam/</span><span class="sc">{sample}</span><span class="st">/Aligned.sortedByCoord.out.bam&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>][wildcards.group])</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/merged/</span><span class="sc">{group}</span><span class="st">.bam&quot;</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    threads: <span class="dv">2</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    wrapper:</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;v1.1.0/bio/samtools/merge&quot;</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>rule count:</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;results/merged/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>        gtf <span class="op">=</span> config[<span class="st">&quot;gtf&quot;</span>],</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>        extra <span class="op">=</span> config[<span class="st">&quot;feature_counts&quot;</span>][<span class="st">&quot;options&quot;</span>]</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/subread.yaml&quot;</span></span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>    shell:</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a><span class="co">        featureCounts -a {params.gtf} -o {output} {params.extra} {input}</span></span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>rule DGEList:</span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: expand(<span class="st">&quot;results/counts/</span><span class="sc">{sample}</span><span class="st">.txt&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;groups&#39;</span>])</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;results/dgel.rds&quot;</span></span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>    params:</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> config[<span class="st">&#39;groups&#39;</span>]</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/r_edger.yaml&quot;</span></span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a>    script: <span class="st">&quot;scripts/create_dge_list.R&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <ul>
-<li>Both, <code>conda</code> and <code>wrapper</code> directives specify software environments in which the job is executed</li>
 <li>The <code>conda</code> directive points to an environment definition which is written in simple YAML file such as:</li>
 </ul>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>star.yaml</strong></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>channels:</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> <span class="op">-</span> bioconda</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>dependencies:</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a> <span class="op">-</span> star <span class="op">=</span> <span class="fl">2.7.0</span><span class="er">b</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
+<p><code>{.yaml, filename=&quot;star.yaml&quot;} channels:  - bioconda dependencies:  - star = 2.7.0b</code></p>
 <ul>
-<li><p>The <a href="https://anaconda.org/bioconda/">bioconda channel</a> is dedicated to bioinformatics software. Check it to figure out available tool releases!</p></li>
-<li><p>Wrappers for many popular tools are made available at <a href="https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html">https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html</a></p></li>
-<li><p>They provide conda recipes for tool installation and shell directives that wrap calls to the command line</p></li>
-<li><p>The downside of wrappers is that they require internet access during execution (see cluster problem below)</p></li>
+<li>The <a href="https://anaconda.org/bioconda/">bioconda channel</a> is dedicated to bioinformatics software. Check it to figure out available tool releases!</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -2835,28 +2882,43 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Running snakemake –software-deployment-method conda –conda-create-envs-only will only install the required conda environments without running the full workflow. Subsequent runs with –software-deployment-method conda will make use of the local environments without requiring internet access.</p>
+<p>Running <code>snakemake --sdm conda --conda-create-envs-only</code> will only install the required conda environments without running the full workflow. Subsequent runs with <code>--sdm conda</code> will make use of the local environments without requiring internet access.</p>
 </div>
 </div>
-<section id="example-5" class="level3">
-<h3 class="anchored" data-anchor-id="example-5">Example 5</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <ul>
-<li>Executing Snakemake with the <code>--use-conda</code> flag will first build the corresponding environments and then run the workflow locally, executing each job in a specified environment</li>
+<li>Any update of an environment definition will cause an update of all affected targets when re-running the workflow.</li>
 </ul>
-<pre><code>snakemake -j 4 --software-deployment-method conda</code></pre>
+</div>
+</div>
 <ul>
-<li>Any update of an environment definition will cause an update of all affected targets when re-running the workflow</li>
+<li><p>Alternatively, <a href="https://snakemake-wrappers.readthedocs.io/en/stable/">wrappers</a> provide ready made definitions for software environments as well as shell directives that wrap calls to the command line.</p></li>
+<li><p>Wrappers are available for many popular tools at <a href="https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html">https://snakemake-wrappers.readthedocs.io/en/stable/wrappers.html</a></p></li>
+<li><p>The downside of wrappers is that they require internet access during execution, which limits their use to login nodes in the default setup.</p></li>
 </ul>
-</section>
 </section>
 <section id="run-snakemake-on-scicore-slurm-cluster" class="level2">
 <h2 class="anchored" data-anchor-id="run-snakemake-on-scicore-slurm-cluster">Run Snakemake on sciCORE slurm cluster</h2>
 <ul>
 <li><p>A big benefit of Snakemake is to scale up/parallelize workflow execution by using cluster or cloud computing</p></li>
-<li><p>Cluster or cloud back-ends require resource specifications for each job. This is achieved by the <code>resources</code> tag on a per rule basis.</p></li>
+<li><p>Cluster or cloud back-ends require <a href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#resources">resource</a> specifications for each job. This is achieved by the <code>resources</code> tag on a per rule basis.</p></li>
 <li><p>Depending on the back-end these could include temporary directory, disk space, required memory or run time.</p></li>
+<li><p>Resources can be set dynamically depending on the input (or params, wildcrads etc.) using functions or lambda expressions:</p></li>
 </ul>
 <div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Snakefile</strong></pre>
+</div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rule align:</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>: <span class="st">&quot;fastq/</span><span class="sc">{sample}</span><span class="st">.fq.gz&quot;</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    output: <span class="st">&quot;bam/</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span></span>
@@ -2866,46 +2928,38 @@ Note
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    threads:</span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    resources:</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        mem <span class="op">=</span> <span class="dv">40000</span>,</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        time <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        mem_mb <span class="op">=</span> <span class="kw">lambda</span> <span class="bu">input</span>, params: <span class="bu">max</span>(<span class="dv">5000</span>, params.index.size_mb <span class="op">+</span> <span class="dv">5000</span>),</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        time <span class="op">=</span> <span class="kw">lambda</span> <span class="bu">input</span>: <span class="dv">30</span> <span class="cf">if</span> <span class="bu">input</span>.bam.size_mb <span class="op">&lt;</span> <span class="dv">2000</span> <span class="cf">else</span> <span class="dv">360</span>,</span>
 <span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    conda: <span class="st">&quot;envs/star.yaml&quot;</span></span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    shell:</span>
 <span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;</span></span>
 <span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="co">        STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/</span></span>
 <span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co">        &quot;&quot;&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<ul>
-<li>Resources can also be set dynamically depending on the input (or params, wildcrads etc.) using functions or lambda expressions:</li>
-</ul>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>rule xyz:</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">input</span>:</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>        bam <span class="op">=</span> expand(<span class="st">&quot;</span><span class="sc">{sample}</span><span class="st">.bam&quot;</span>, sample<span class="op">=</span>config[<span class="st">&#39;samples&#39;</span>])</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    resources:</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        mem_mb <span class="op">=</span> <span class="kw">lambda</span> <span class="bu">input</span>: <span class="bu">max</span>(<span class="dv">500</span>, <span class="dv">2</span><span class="op">*</span><span class="bu">input</span>.bam.size_mb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li><p>Ideally back-end specifications (e.g. slurm <code>qos</code>) are separated from workflow definitions via specific <a href="https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles">profiles</a>. They tell Snakemake how to communicate with a specific back-end.</p></li>
-<li><p>We provide a simple scicore-surm profile at: <a href="https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git">https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git</a></p></li>
-</ul>
-<pre><code>scicore-slurm/
-├── config.yaml
-├── slurm-status.sh
-└── slurm-submit.py</code></pre>
-<ul>
-<li>Profiles contain:
+<li><p>Profiles contain:</p>
 <ul>
 <li>a <code>config.yaml</code> file with default options for the Snakemake command line</li>
 <li>a submit script that parses resource definitions of each job and constructs a submission command (slurm: <code>sbatch &lt;options&gt; &lt;script&gt;</code>)</li>
 <li>a script which checks the job status (slurm: <code>sacct &lt;jobid&gt; &lt;options&gt;</code>) and reports it back to Snakemake</li>
 </ul></li>
-<li>The <code>localrules:</code> statement allows to select rules which are executed locally (in the submission node) instead of the cluster</li>
-<li>Execution of Snakemake wrappers need internet access, so rule <code>merge</code> must be a local rule</li>
+<li><p>We provide a sciCORE-specific slurm profile at <a href="https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git">https://git.scicore.unibas.ch/DBM_bioinfo/ivanek/snakemake/profiles/scicore-slurm.git</a>. It offers a few sciCORE specific tweaks:</p>
+<ul>
+<li>translate <code>time</code> to scicore-slurm <code>qos</code> settings</li>
+<li>allow setting of group accounts</li>
+<li>easy to extend to user needs</li>
+</ul></li>
+<li><p>When installed under <code>$HOME/.config/snakemake</code>, Snakemake can be invoked using the profile:</p></li>
 </ul>
-<section id="example-6" class="level3">
-<h3 class="anchored" data-anchor-id="example-6">Example 6</h3>
-<pre><code>snakemake --profile scicore-slurm</code></pre>
-</section>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">--profile</span> scicore-slurm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li><p>The <code>localrules</code> statement allows to select rules which are executed locally (in the submission node) instead of the cluster</p></li>
+<li><p>Execution of Snakemake wrappers need internet access, so rule <code>merge</code> must be a local rule</p></li>
+</ul>
 </section>
 </section>
 <section id="additional-resources" class="level1">
@@ -2920,10 +2974,13 @@ Note
 </section>
 <section id="tasks-for-the-workshop" class="level1">
 <h1>Tasks for the workshop</h1>
-<ol type="1">
-<li><p>Add a fastq filtering step using the <a href="https://github.com/OpenGene/fastp">fastp</a> tool (on bioconda <a href="https://anaconda.org/bioconda/fastp">https://anaconda.org/bioconda/fastp</a>). This tools allows among other things read trimming and adaptor removal.</p></li>
-<li><p>A sample file lists all fastq files and corresponding samples (tsv format; path relative to Snakefile)</p></li>
-</ol>
+<section id="task-1" class="level2">
+<h2 class="anchored" data-anchor-id="task-1">Task 1</h2>
+<p>Add a fastq filtering step using the <a href="https://github.com/OpenGene/fastp">fastp</a> tool (on bioconda <a href="https://anaconda.org/bioconda/fastp">https://anaconda.org/bioconda/fastp</a>). This tools allows among other things read trimming and adaptor removal.</p>
+</section>
+<section id="task-2" class="level2">
+<h2 class="anchored" data-anchor-id="task-2">Task 2</h2>
+<p>A sample file lists all fastq files and corresponding samples (tsv format; path relative to Snakefile)</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>samples.tsv</strong></pre>
@@ -2934,9 +2991,10 @@ fastq/rna_2.fq.gz   sample_1
 fastq/rna_3.fq.gz   sample_2</code></pre>
 </div>
 <p>Create a python function which reads in the sample file and returns two dictionaries that can be used as rule inputs: 1. <code>fq_files</code>: which maps a file name to file path(s) 2. <code>samples</code>: which maps a sample name to file name(s)</p>
-<ol start="3" type="1">
-<li>Update the workflow to handle single as well as paired end data. A paired-end data example is in <code>fastq_paired</code>, the corresponding sample file looks like this:</li>
-</ol>
+</section>
+<section id="task-3" class="level2">
+<h2 class="anchored" data-anchor-id="task-3">Task 3</h2>
+<p>Update the workflow to handle single as well as paired end data. A paired-end data example is in <code>fastq_paired</code>, the corresponding sample file looks like this:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>samples.tsv</strong></pre>
@@ -2956,6 +3014,7 @@ rna_3_L2_R1.fq.gz       rna_3_L2_R2.fq.gz       rna_3</code></pre>
 <li>Either create distinct rules for single or paired-end data or use flexible input output definitions depending on the value of <code>PAIRED</code>. Since output directives don’t allow functions, you will need expressions like: <code>&lt;input1&gt; if PAIRED else &lt;input2&gt;</code></li>
 </ul></li>
 </ul>
+</section>
 </section>
 
 </main>
