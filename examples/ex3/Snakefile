@@ -1,9 +1,9 @@
-configfile: "config.yaml"
-configfile: "tools.yaml" # sequentially merged into config dictionary
+configfile: "tools.yaml" 
+configfile: "config.yaml" # merged into tools dictionary; allows to overwrite defaults in tools.yaml 
 
 rule all:
     input: "results/dgel.rds"
-        
+
 rule align:
     input: "../fastq/{sample}.fq.gz"
     output: "results/bam/{sample}/Aligned.sortedByCoord.out.bam"
@@ -12,17 +12,19 @@ rule align:
         options = config["star"]["options"]
     threads:
         4
+    envmodules: "STAR/2.7.10b-GCC-11.3.0"    
     shell:
         """
         STAR --genomeDir {params.index} {params.options} --readFilesIn {input} --outFileNamePrefix results/bam/{wildcards.sample}/
         """
-	
+
 rule count:
     input: "results/bam/{sample}/Aligned.sortedByCoord.out.bam"
     output: "results/counts/{sample}.txt"
     params:
         gtf = config["gtf"],
-	extra = config["feature_counts"]["options"]
+        extra = config["feature_counts"]["options"]
+    envmodules: "Subread/2.0.6-GCC-11.3.0"
     shell:
         """
         featureCounts -a {params.gtf} -o {output} {params.extra} {input}
@@ -31,6 +33,9 @@ rule count:
 rule DGEList:
     input: expand("results/counts/{sample}.txt", sample=config['samples'])
     output: "results/dgel.rds"
+    log: "log/dgelist.log"
     params:
+        r_lib = config['r_lib'],
         names = config['samples']
+    envmodules: "R/4.4.2-gfbf-2024a-bare"
     script: "scripts/create_dge_list.R"

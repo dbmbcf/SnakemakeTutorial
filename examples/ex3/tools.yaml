@@ -1,5 +1,6 @@
 star:
-  index: "/scicore/data/managed/igenomes/latest/Mus_musculus/Ensembl/GRCm38/Sequence/STARIndex/"
+  index: "/scicore/home/ivanek/GROUP/snakemake_genomes/mm10/STAR"
   options: "--outSAMtype BAM SortedByCoordinate --readFilesCommand zcat"
 feature_counts:
   options: "-O -M --primary"
+r_lib: "/scicore/home/ivanek/GROUP/R-libraries/4.4.2-gfbf-2024a-bare-bioc-3.20"
